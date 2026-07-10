@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result - AI Classifier</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS Styles -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    <style>
+        .result-container {
+            max-width: 900px;
+            margin: 4rem auto;
+            padding: 0 1.5rem;
+        }
+        .result-img-box {
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid var(--glass-border);
+            box-shadow: var(--shadow-lg);
+            height: 380px;
+            position: relative;
+        }
+        .result-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .confidence-badge {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(11, 19, 43, 0.85);
+            color: var(--accent-cyan);
+            backdrop-filter: blur(5px);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="result-container">
+        
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="fw-bold"><i class="fas fa-magic text-primary me-2"></i> Classification Results</h1>
+            <p class="text-muted">The trained K-Nearest Neighbors model has successfully analyzed your coordinates.</p>
+        </div>
+
+        <div class="row align-items-center">
+            <!-- Flower Image Column -->
+            <div class="col-md-6 mb-4">
+                <div class="result-img-box">
+                    {% if prediction == 'setosa' %}
+                        <img src="/static/images/setosa.png" alt="Iris Setosa">
+                    {% elif prediction == 'versicolor' %}
+                        <img src="/static/images/versicolor.png" alt="Iris Versicolor">
+                    {% else %}
+                        <img src="/static/images/virginica.png" alt="Iris Virginica">
+                    {% endif %}
+                    <div class="confidence-badge">
+                        <i class="fas fa-chart-pie me-2"></i>{{ (confidence * 100) | round(1) }}% Match
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details Column -->
+            <div class="col-md-6 mb-4">
+                <div class="glass-card mb-0">
+                    <span class="badge bg-primary px-3 py-2 fw-semibold text-uppercase mb-2">Classified Species</span>
+                    <h2 class="fw-bold mb-1">Iris {{ prediction.capitalize() }}</h2>
+                    <h6 class="text-muted italic mb-4">
+                        {% if prediction == 'setosa' %}
+                            *Iris setosa*
+                        {% elif prediction == 'versicolor' %}
+                            *Iris versicolor*
+                        {% else %}
+                            *Iris virginica*
+                        {% endif %}
+                    </h6>
+
+                    <p class="text-secondary small leading-relaxed mb-4">
+                        {% if prediction == 'setosa' %}
+                            The wild Iris Setosa is a perennial flowering species boasting blue-violet flowers. It is native to sub-arctic environments (like Alaska and Siberia) and is physically distinct for having extremely small, narrow petals and wide sepals.
+                        {% elif prediction == 'versicolor' %}
+                            Iris Versicolor (commonly known as the Blue Flag) is a species of Iris native to Eastern North America. It represents the middle of the Iris class ranges, characterized by medium-sized petals with beautiful purple, blue, and yellow patterns.
+                        {% else %}
+                            Iris Virginica (commonly known as the Virginia Iris) is a robust perennial species native to eastern North American coastal marshes. It features the largest, most prominent petals and sepals of the three species, typically with deep, dark vein markings.
+                        {% endif %}
+                    </p>
+
+                    <!-- User input summary -->
+                    <div class="bg-light p-3 rounded mb-4 border">
+                        <h6 class="fw-bold mb-2 small text-primary"><i class="fas fa-list-ol me-2"></i> Input Parameters:</h6>
+                        <div class="row text-center text-secondary small">
+                            <div class="col-6 mb-2">Sepal Length: <strong>{{ inputs.sepal_length }} cm</strong></div>
+                            <div class="col-6 mb-2">Sepal Width: <strong>{{ inputs.sepal_width }} cm</strong></div>
+                            <div class="col-6">Petal Length: <strong>{{ inputs.petal_length }} cm</strong></div>
+                            <div class="col-6">Petal Width: <strong>{{ inputs.petal_width }} cm</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Predictions Probabilities -->
+                    <h6 class="fw-bold mb-3 small text-primary"><i class="fas fa-chart-bar me-2"></i> Prediction Probabilities:</h6>
+                    
+                    {% for name, prob in prob_dict.items() %}
+                    <div class="probability-bar-wrapper">
+                        <div class="probability-labels">
+                            <span>Iris-{{ name.capitalize() }}</span>
+                            <span>{{ (prob * 100) | round(1) }}%</span>
+                        </div>
+                        <div class="probability-bar-outer">
+                            <div class="probability-bar-inner probability-bar-{{ name }}" style="width: {{ prob * 100 }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-flex flex-wrap gap-2 pt-4">
+                        <a href="/predict" class="btn btn-primary rounded-pill px-4 flex-grow-1"><i class="fas fa-redo me-2"></i> Predict Another</a>
+                        <a href="/" class="btn btn-outline-secondary rounded-pill px-4"><i class="fas fa-home"></i> Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check for active theme stored in localstorage
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+    </script>
+</body>
+</html>
